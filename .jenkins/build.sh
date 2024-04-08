@@ -53,12 +53,11 @@ if [[ "${JOB_TYPE}" == "worker" ]]; then
   # Step 2: Keep certain tutorials based on file count, and remove runnable code in all other tutorials
   # IMPORTANT NOTE: We assume that each tutorial has a UNIQUE filename.
   FILES_TO_RUN=$(python .jenkins/get_files_to_run.py)
-  echo "FILES_TO_RUN: " ${FILES_TO_RUN}
   # Files to run must be accessible to subprocessed (at least to `download_data.py`)
   export FILES_TO_RUN
 
-  # Step 3: Run `make docs` to generate HTML files and static files for these tutorials
-  make docs
+  make download
+  python .jenkins/sphinx_files.py
 
   # Step 3.1: Run the post-processing script:
   python .jenkins/post_process_notebooks.py
