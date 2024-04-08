@@ -58,6 +58,12 @@ if [[ "${JOB_TYPE}" == "worker" ]]; then
 
   make download
   python .jenkins/sphinx_files.py
+  mkdir docs
+  cp -r beginner docs
+  cp -r intermediate docs
+  cp -r prototype docs
+  cp -r recipes docs
+  cp -r advanced docs
 
   # Step 3.1: Run the post-processing script:
   python .jenkins/post_process_notebooks.py
@@ -109,6 +115,12 @@ if [[ "${JOB_TYPE}" == "worker" ]]; then
   done
   set -x
 
+  mv docs/prototype docs/prototype_source
+  mv docs/beginner docs/beginner_source
+  mv docs/advanced docs/advanced_source
+  mv docs/intermediate docs/intermediate_source
+  mv docs/recipes docs/recipes_source
+
   # Step 5: Remove INVISIBLE_CODE_BLOCK from .html/.rst.txt/.ipynb/.py files
   bash $DIR/remove_invisible_code_block_batch.sh docs
   python .jenkins/validate_tutorials_built.py
@@ -117,10 +129,6 @@ if [[ "${JOB_TYPE}" == "worker" ]]; then
   7z a worker_${WORKER_ID}.7z docs
   awsv2 s3 cp worker_${WORKER_ID}.7z s3://${BUCKET_NAME}/${COMMIT_ID}/worker_${WORKER_ID}.7z
 elif [[ "${JOB_TYPE}" == "manager" ]]; then
-  # Step 1: Generate no-plot HTML pages for all tutorials
-  make html-noplot
-  cp -r _build/html docs
-
   # Step 2: Wait for all workers to finish
   # Don't actually need to do this because gha will wait
 
@@ -129,8 +137,12 @@ elif [[ "${JOB_TYPE}" == "manager" ]]; then
   for ((worker_id=1;worker_id<NUM_WORKERS+1;worker_id++)); do
     awsv2 s3 cp s3://${BUCKET_NAME}/${COMMIT_ID}/worker_$worker_id.7z worker_$worker_id.7z
     7z x worker_$worker_id.7z -oworker_$worker_id
-    yes | cp -R worker_$worker_id/docs/* docs_with_plot/docs
+    yes | cp -R worker_$worker_id/docs/* .
   done
+
+  # Step 1: Generate no-plot HTML pages for all tutorials
+  make html-noplot
+  cp -r _build/html docs
 
   # Step 4: Copy all generated files into docs
   rsync -av docs_with_plot/docs/ docs --exclude='**aws_distributed_training_tutorial*'
