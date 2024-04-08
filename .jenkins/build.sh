@@ -56,14 +56,8 @@ if [[ "${JOB_TYPE}" == "worker" ]]; then
   # Files to run must be accessible to subprocessed (at least to `download_data.py`)
   export FILES_TO_RUN
 
-  make download
-  python .jenkins/sphinx_files.py
-  mkdir docs
-  cp -r beginner docs
-  cp -r intermediate docs
-  cp -r prototype docs
-  cp -r recipes docs
-  cp -r advanced docs
+  # Step 3: Run `make docs` to generate HTML files and static files for these tutorials
+  make docs
 
   # Step 3.1: Run the post-processing script:
   python .jenkins/post_process_notebooks.py
