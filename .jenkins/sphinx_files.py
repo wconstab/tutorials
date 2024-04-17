@@ -14,6 +14,7 @@ def main() -> None:
         for gen_file in files:
             if file in str(gen_file):
                 rel_path = os.path.relpath(gen_file, f"_build/{file}")
+                print(gen_file, f"_build/{rel_path}")
                 shutil.copy(gen_file, f"_build/{rel_path}")
 
 if __name__ == "__main__":
