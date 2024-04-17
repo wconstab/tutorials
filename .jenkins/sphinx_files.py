@@ -10,7 +10,7 @@ def main() -> None:
         print(f"Running {file}")
         env["RUNTHIS"] = file
         subprocess.check_output(["make", "html", f"BUILDDIR=_build/{file}"], env=env)
-        files = glob.glob(f"_build/{file}/**", recursive=True)
+        files = glob.glob(f"_build/{file}/**/*", recursive=True)
         for gen_file in files:
             if file in str(gen_file):
                 rel_path = os.path.relpath(gen_file, f"_build/{file}")
