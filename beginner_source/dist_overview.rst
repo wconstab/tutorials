@@ -1,6 +1,6 @@
 PyTorch Distributed Overview
 ============================
-**Author**: `Shen Li <https://mrshenli.github.io/>`_
+**Author**: `Shen Li <https://mrshenli.github.io/>`_, `Will Constable <https://github.com
 
 .. note::
    |edit| View and edit this tutorial in `github <https://github.com/pytorch/tutorials/blob/main/beginner_source/dist_overview.rst>`__.
@@ -15,41 +15,25 @@ to the technology that can best serve your use case.
 Introduction
 ------------
 
-As of PyTorch v1.6.0, features in ``torch.distributed`` can be categorized into
-three main components:
+Features in ``torch.distributed`` can be categorized into the following layers:
 
-* `Distributed Data-Parallel Training <https://pytorch.org/docs/stable/generated/torch.nn.parallel.DistributedDataParallel.html>`__
+* Parallelism libraries (See below for more information on Data, Tensor, and
+  Pipeline parallelism libraries, and how they compose)
+* Communications Libraries (<https://pytorch.org/docs/stable/distributed.html>)
+  (c10d) library supports sending tensors across processes within a group. It
+  offers both collective communication APIs (e.g.,
+  `all_reduce <https://pytorch.org/docs/stable/distributed.html#torch.distributed.all_reduce>`__
+  and `all_gather <https://pytorch.org/docs/stable/distributed.html#torch.distributed.all_gather>`__)
+  and P2P communication APIs (e.g. `send <https://pytorch.org/docs/stable/distributed.html#torch.distributed.send>`__
+  and `isend <https://pytorch.org/docs/stable/distributed.html#torch.distributed.isend>`__).
+
+`Distributed Data-Parallel Training <https://pytorch.org/docs/stable/generated/torch.nn.parallel.DistributedDataParallel.html>`__
   (DDP) is a widely adopted single-program multiple-data training paradigm. With
   DDP, the model is replicated on every process, and every model replica will be
   fed with a different set of input data samples. DDP takes care of gradient
   communication to keep model replicas synchronized and overlaps it with the
   gradient computations to speed up training.
-* `RPC-Based Distributed Training <https://pytorch.org/docs/stable/rpc.html>`__
-  (RPC) supports general training structures that cannot fit into
-  data-parallel training such as distributed pipeline parallelism, parameter
-  server paradigm, and combinations of DDP with other training paradigms. It
-  helps manage remote object lifetime and extends the
-  `autograd engine <https://pytorch.org/docs/stable/autograd.html>`__ beyond
-  machine boundaries.
-* `Collective Communication <https://pytorch.org/docs/stable/distributed.html>`__
-  (c10d) library supports sending tensors across processes within a group. It
-  offers both collective communication APIs (e.g.,
-  `all_reduce <https://pytorch.org/docs/stable/distributed.html#torch.distributed.all_reduce>`__
-  and `all_gather <https://pytorch.org/docs/stable/distributed.html#torch.distributed.all_gather>`__)
-  and P2P communication APIs (e.g.,
-  `send <https://pytorch.org/docs/stable/distributed.html#torch.distributed.send>`__
-  and `isend <https://pytorch.org/docs/stable/distributed.html#torch.distributed.isend>`__).
-  DDP and RPC (`ProcessGroup Backend <https://pytorch.org/docs/stable/rpc.html#process-group-backend>`__)
-  are built on c10d, where the former uses collective communications
-  and the latter uses P2P communications. Usually, developers do not need to
-  directly use this raw communication API, as the DDP and RPC APIs can serve
-  many distributed training scenarios. However, there are use cases where this API
-  is still helpful. One example would be distributed parameter averaging, where
-  applications would like to compute the average values of all model parameters
-  after the backward pass instead of using DDP to communicate gradients. This can
-  decouple communications from computations and allow finer-grain control over
-  what to communicate, but on the other hand, it also gives up the performance
-  optimizations offered by DDP.
+
   `Writing Distributed Applications with PyTorch <../intermediate/dist_tuto.html>`__
   shows examples of using c10d communication APIs.
 
